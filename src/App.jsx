@@ -2,36 +2,39 @@ import s from './App.module.css'
 import { api } from './constants/api'
 import { useState, useEffect } from 'react'
 import logo from '/logo.png'
+import { Card } from './components/card'
 
 function App() {
   const [data, setData] = useState([])
-  const [page, setPage]
+  const [page, setPage] = useState (1)
+  const [inputPage, setInputPage] = useState ("") 
 
   useEffect(() => {
-    api.get(`/character/page=${page}&name=${name}`).then((response) => {
-      setData(response.data.results)
-    }).catch((error) => {
-      console.error("Deu ruim!!!", error)
-    })
-  }, [])
+    const carrega = async () => {
+      try{
+        const response = await api.get(`/character/?page=${page}`)
+        setData(response.data.results)
+      }catch{
+        console.error("deu ruim")
+      }
+    } 
+    carrega()
+  }, [page])
   
 
   return (
     <>
       <img className={s.logo} src={logo} alt="Logo Rick and Morty" />
-      <div className={s.search}>
-        <label>Search name</label>
-        <input type="text" placeholder='Type the name you want'value={name} onChange={(e)=>setName}/>
+      <div>
+        <label>Choose Page</label>
+        <input min={1} max={42} type="number" placeholder='Type the page 1/42' value={inputPage} onChange={(e) => setInputPage(e.target.value)}/>
+        <button onClick={() => setPage(Number(inputPage))}>buscar</button>
       </div>
       <main>
-        {data.map((item, index) => {
+        {data.map((item) => {
           return(
-            <div>
-              <h2>{item.name}</h2>
-              <img src={item.image} alt="" />
-              <h4>Name: {item.image}</h4>
-              <p>Species: {item.species}</p>
-                {item.status === "Dead" ? "Status:" }
+            <div key={item.id} >
+              <Card nome={item.name} imagem={item.image} especies={item.species} origem={item.origin.name}/>
             </div>
           )
         })}
